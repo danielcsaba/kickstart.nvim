@@ -1,89 +1,3 @@
---[[
-
-=====================================================================
-==================== READ THIS BEFORE CONTINUING ====================
-=====================================================================
-========                                    .-----.          ========
-========         .----------------------.   | === |          ========
-========         |.-""""""""""""""""""-.|   |-----|          ========
-========         ||                    ||   | === |          ========
-========         ||   KICKSTART.NVIM   ||   |-----|          ========
-========         ||                    ||   | === |          ========
-========         ||                    ||   |-----|          ========
-========         ||:Tutor              ||   |:::::|          ========
-========         |'-..................-'|   |____o|          ========
-========         `"")----------------(""`   ___________      ========
-========        /::::::::::|  |::::::::::\  \ no mouse \     ========
-========       /:::========|  |==hjkl==:::\  \ required \    ========
-========      '""""""""""""'  '""""""""""""'  '""""""""""'   ========
-========                                                     ========
-=====================================================================
-=====================================================================
-
-What is Kickstart?
-
-  Kickstart.nvim is *not* a distribution.
-
-  Kickstart.nvim is a starting point for your own configuration.
-    The goal is that you can read every line of code, top-to-bottom, understand
-    what your configuration is doing, and modify it to suit your needs.
-
-    Once you've done that, you can start exploring, configuring and tinkering to
-    make Neovim your own! That might mean leaving Kickstart just the way it is for a while
-    or immediately breaking it into modular pieces. It's up to you!
-
-    If you don't know anything about Lua, I recommend taking some time to read through
-    a guide. One possible example which will only take 10-15 minutes:
-      - https://learnxinyminutes.com/docs/lua/
-
-    After understanding a bit more about Lua, you can use `:help lua-guide` as a
-    reference for how Neovim integrates Lua.
-    - :help lua-guide
-    - (or HTML version): https://neovim.io/doc/user/lua-guide.html
-
-Kickstart Guide:
-
-  TODO: The very first thing you should do is to run the command `:Tutor` in Neovim.
-
-    If you don't know what this means, type the following:
-      - <escape key>
-      - :
-      - Tutor
-      - <enter key>
-
-    (If you already know the Neovim basics, you can skip this step.)
-
-  Once you've completed that, you can continue working through **AND READING** the rest
-  of the kickstart init.lua.
-
-  Next, run AND READ `:help`.
-    This will open up a help window with some basic information
-    about reading, navigating and searching the builtin help documentation.
-
-    This should be the first place you go to look when you're stuck or confused
-    with something. It's one of my favorite Neovim features.
-
-    MOST IMPORTANTLY, we provide a keymap "<space>sh" to [s]earch the [h]elp documentation,
-    which is very useful when you're not exactly sure of what you're looking for.
-
-  I have left several `:help X` comments throughout the init.lua
-    These are hints about where to find more information about the relevant settings,
-    plugins or Neovim features used in Kickstart.
-
-   NOTE: Look for lines like this
-
-    Throughout the file. These are for you, the reader, to help you understand what is happening.
-    Feel free to delete them once you know what you're doing, but they should serve as a guide
-    for when you are first encountering a few different constructs in your Neovim config.
-
-If you experience any errors while trying to install kickstart, run `:checkhealth` for more info.
-
-I hope you enjoy your Neovim journey,
-- TJ
-
-P.S. You can delete this when you're done too. It's your config now! :)
---]]
-
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -91,18 +5,27 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
+
+-- Add TeX binaries to PATH for pandoc PDF generation
+vim.env.PATH = '/Library/TeX/texbin:' .. vim.env.PATH
+
+-- Enable 24-bit true color support (from old config)
+vim.opt.termguicolors = true
+
+-- Fix key handling in tmux and other terminals
+if vim.env.TMUX then
+  -- We're inside tmux, set up better key handling
+  vim.opt.ttimeoutlen = 10
+end
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
--- NOTE: You can change these options as you wish!
 --  For more options, you can see `:help option-list`
 
--- Make line numbers default
+-- Make line numbers and relative line numbers default
 vim.o.number = true
--- You can also add relative line numbers, to help with jumping.
---  Experiment for yourself to see if you like it!
--- vim.o.relativenumber = true
+vim.o.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = 'a'
@@ -111,7 +34,6 @@ vim.o.mouse = 'a'
 vim.o.showmode = false
 
 -- Sync clipboard between OS and Neovim.
---  Schedule the setting after `UiEnter` because it can increase startup-time.
 --  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
 vim.schedule(function()
@@ -144,13 +66,14 @@ vim.o.splitbelow = true
 -- Sets how neovim will display certain whitespace characters in the editor.
 --  See `:help 'list'`
 --  and `:help 'listchars'`
---
---  Notice listchars is set using `vim.opt` instead of `vim.o`.
---  It is very similar to `vim.o` but offers an interface for conveniently interacting with tables.
---   See `:help lua-options`
---   and `:help lua-options-guide`
 vim.o.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+vim.opt.listchars = {
+  tab = '→ ',
+  trail = '·',
+  extends = '»', -- Right double angle for line continues right
+  precedes = '«', -- Left double angle for content to the left
+  nbsp = '␣', -- Open box for non-breaking spaces
+}
 
 -- Preview substitutions live, as you type!
 vim.o.inccommand = 'split'
@@ -161,6 +84,10 @@ vim.o.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.o.scrolloff = 10
 
+-- Fold settings
+vim.o.foldmethod = 'indent'
+vim.o.foldlevel = 99 -- Start with folds open by default
+
 -- if performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
 -- instead raise a dialog asking if you wish to save the current file(s)
 -- See `:help 'confirm'`
@@ -169,26 +96,74 @@ vim.o.confirm = true
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
--- Clear highlights on search when pressing <Esc> in normal mode
---  See `:help hlsearch`
-vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+-- Map kj to escape in insert mode
+vim.keymap.set('i', 'kj', '<Esc>', { desc = 'Exit insert mode' })
+
+-- Folding toggle with leader+z
+vim.keymap.set('n', '<leader>z', 'za', { desc = 'Toggle fold' })
+
+-- Clear search highlights, redraw screen, and show confirmation message
+vim.keymap.set('n', '<C-n>', '<cmd>nohlsearch<CR><C-l><cmd>echo "Search Cleared"<CR>', { desc = 'Clear search highlights and redraw' })
+
+-- Configuration management keymaps
+vim.keymap.set('n', '<leader>cr', function()
+  -- Clear all loaded modules to ensure clean reload
+  for name, _ in pairs(package.loaded) do
+    if name:match '^user' or name:match '^custom' then
+      package.loaded[name] = nil
+    end
+  end
+  -- Reload the init.lua file
+  dofile(vim.fn.stdpath 'config' .. '/init.lua')
+  vim.notify('Configuration reloaded!', vim.log.levels.INFO)
+end, { desc = '[C]onfig [R]eload' })
+
+-- Quick edit configuration file
+vim.keymap.set('n', '<leader>ce', function()
+  vim.cmd('edit ' .. vim.fn.stdpath 'config' .. '/init.lua')
+end, { desc = '[C]onfig [E]dit' })
+
+-- Mason management keymaps
+vim.keymap.set('n', '<leader>cm', '<cmd>Mason<CR>', { desc = '[C]onfig [M]ason' })
+vim.keymap.set('n', '<leader>cu', '<cmd>MasonToolsUpdate<CR>', { desc = '[C]onfig [U]pdate tools' })
+vim.keymap.set('n', '<leader>ci', '<cmd>MasonToolsInstall<CR>', { desc = '[C]onfig [I]nstall tools' })
+
+-- Check active LSP servers
+vim.keymap.set('n', '<leader>cl', function()
+  local clients = vim.lsp.get_clients()
+  if #clients == 0 then
+    vim.notify('No LSP clients attached', vim.log.levels.INFO)
+    return
+  end
+
+  local client_names = {}
+  for _, client in ipairs(clients) do
+    table.insert(client_names, client.name)
+  end
+
+  vim.notify('Active LSP clients: ' .. table.concat(client_names, ', '), vim.log.levels.INFO)
+end, { desc = '[C]heck [L]SP servers' })
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 
+-- Toggle diagnostics display
+vim.keymap.set('n', '<leader>td', function()
+  if vim.diagnostic.is_enabled() then
+    vim.diagnostic.enable(false)
+    vim.notify('Diagnostics disabled', vim.log.levels.INFO)
+  else
+    vim.diagnostic.enable(true)
+    vim.notify('Diagnostics enabled', vim.log.levels.INFO)
+  end
+end, { desc = '[T]oggle [D]iagnostics' })
+
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
---
 -- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
 -- or just use <C-\><C-n> to exit terminal mode
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
-
--- TIP: Disable arrow keys in normal mode
--- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
--- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
--- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
--- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
@@ -198,12 +173,6 @@ vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
-
--- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
--- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
--- vim.keymap.set("n", "<C-S-l>", "<C-w>L", { desc = "Move window to the right" })
--- vim.keymap.set("n", "<C-S-j>", "<C-w>J", { desc = "Move window to the lower" })
--- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -216,6 +185,43 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
   callback = function()
     vim.hl.on_yank()
+  end,
+})
+
+-- File-type specific settings (from old config)
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'sql',
+  desc = 'SQL file settings',
+  group = vim.api.nvim_create_augroup('sql-settings', { clear = true }),
+  callback = function()
+    vim.bo.fixeol = false -- No end of line for sql files
+    vim.bo.commentstring = '-- %s' -- SQL comment style
+    vim.bo.tabstop = 2 -- Tab discplays two spaces
+    vim.bo.shiftwidth = 2 -- Indent with two spaces
+    vim.bo.softtabstop = 2 -- Tab key inserts two spaces
+    vim.bo.expandtab = true -- Use spaces instead of Tabs
+  end,
+})
+
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'toml',
+  desc = 'TOML file settings',
+  group = vim.api.nvim_create_augroup('toml-settings', { clear = true }),
+  callback = function()
+    vim.bo.fixeol = false -- No end of line for toml files
+  end,
+})
+
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'python',
+  desc = 'Python file settings',
+  group = vim.api.nvim_create_augroup('python-settings', { clear = true }),
+  callback = function()
+    vim.bo.commentstring = '# %s' -- Python comment style
+    vim.bo.tabstop = 4 -- Tab discplays two spaces
+    vim.bo.shiftwidth = 4 -- Indent with two spaces
+    vim.bo.softtabstop = 4 -- Tab key inserts two spaces
+    vim.bo.expandtab = true -- Use spaces instead of Tabs
   end,
 })
 
@@ -246,8 +252,42 @@ rtp:prepend(lazypath)
 --
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
-  -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
+
+  'tpope/vim-unimpaired', -- Handy bracket mappings
+  'tpope/vim-fugitive', -- Git integration
+  'tpope/vim-rhubarb', -- GitHub integration for fugitive
+  'tpope/vim-commentary', -- Easy commenting
+
+  -- File explorer
+  {
+    'nvim-tree/nvim-tree.lua',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    config = function()
+      -- Disable netrw
+      vim.g.loaded_netrw = 1
+      vim.g.loaded_netrwPlugin = 1
+
+      require('nvim-tree').setup()
+      -- Toggle nvim-tree with Alt+b (primary)
+      vim.keymap.set('n', '<M-b>', '<cmd>NvimTreeToggle<CR>', { desc = 'Toggle file explorer' })
+      -- and leader+e (backup for tmux)
+      -- vim.keymap.set('n', '<leader>e', '<cmd>NvimTreeToggle<CR>', { desc = 'Toggle file [E]xplorer' })
+    end,
+  },
+
+  -- Terminal (configured in custom/plugins for Python workflow)
+  -- Database tools
+  'tpope/vim-dadbod',
+  {
+    'kristijanhusak/vim-dadbod-completion',
+    ft = { 'sql', 'mysql', 'plsql' },
+    lazy = true,
+  },
+  'kristijanhusak/vim-dadbod-ui',
+
+  -- Python folding
+  'tmhedberg/SimpylFold',
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -347,6 +387,8 @@ require('lazy').setup({
         { '<leader>s', group = '[S]earch' },
         { '<leader>t', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { '<leader>c', group = '[C]onfig' },
+        { '<leader>r', group = '[R]epl/[R]un' },
       },
     },
   },
@@ -406,13 +448,17 @@ require('lazy').setup({
       require('telescope').setup {
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
-        --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
-        -- pickers = {}
+        defaults = {
+          mappings = {
+            n = {
+              ['<c-d>'] = require('telescope.actions').delete_buffer,
+            },
+            i = {
+              ['<C-h>'] = 'which_key',
+              ['<c-d>'] = require('telescope.actions').delete_buffer,
+            },
+          },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
@@ -631,27 +677,29 @@ require('lazy').setup({
       vim.diagnostic.config {
         severity_sort = true,
         float = { border = 'rounded', source = 'if_many' },
-        underline = { severity = vim.diagnostic.severity.ERROR },
-        signs = vim.g.have_nerd_font and {
-          text = {
+
+        -- Only underline errors and warnings
+        underline = {
+          severity = { min = vim.diagnostic.severity.WARN },
+        },
+
+        -- Only show errors and warnings in signs
+        signs = {
+          severity = { min = vim.diagnostic.severity.WARN },
+          text = vim.g.have_nerd_font and {
             [vim.diagnostic.severity.ERROR] = '󰅚 ',
             [vim.diagnostic.severity.WARN] = '󰀪 ',
             [vim.diagnostic.severity.INFO] = '󰋽 ',
             [vim.diagnostic.severity.HINT] = '󰌶 ',
-          },
-        } or {},
+          } or {},
+        },
+
+        -- Only show errors and warnings as virtual text
         virtual_text = {
+          severity = { min = vim.diagnostic.severity.WARN },
           source = 'if_many',
           spacing = 2,
-          format = function(diagnostic)
-            local diagnostic_message = {
-              [vim.diagnostic.severity.ERROR] = diagnostic.message,
-              [vim.diagnostic.severity.WARN] = diagnostic.message,
-              [vim.diagnostic.severity.INFO] = diagnostic.message,
-              [vim.diagnostic.severity.HINT] = diagnostic.message,
-            }
-            return diagnostic_message[diagnostic.severity]
-          end,
+          prefix = '■', -- Simple prefix instead of function
         },
       }
 
@@ -673,7 +721,6 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         -- gopls = {},
-        -- pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -682,7 +729,65 @@ require('lazy').setup({
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
-        --
+
+        -- Python LSP setup with Ruff + Basedpyright
+        ['ruff-lsp'] = {
+          -- Ruff LSP for ultra-fast linting and formatting
+          init_options = {
+            settings = {
+              -- Configure Ruff to be less noisy
+              args = {
+                -- Disable some overly strict rules
+                '--ignore=E501', -- Line too long (let formatter handle this)
+                '--ignore=F401', -- Unused imports (let formatter handle this)
+                '--ignore=E731', -- Do not assign lambda (sometimes useful)
+                '--ignore=W293', -- Blank line contains whitespace
+                '--ignore=W291', -- Trailing whitespace
+                -- Add more rules to ignore as needed
+              },
+            },
+          },
+        },
+        pyright = {
+          -- Standard Pyright for type checking
+          settings = {
+            pyright = {
+              autoImportCompletion = true,
+              -- Disable pyright's organize imports since ruff handles it
+              disableOrganizeImports = true,
+            },
+            python = {
+              analysis = {
+                autoSearchPaths = true,
+                diagnosticMode = 'openFilesOnly',
+                useLibraryCodeForTypes = true,
+                typeCheckingMode = 'strict', -- Options: 'off', 'basic', 'strict'
+                -- Disable specific type checking features that are too noisy
+                diagnosticSeverityOverrides = {
+                  -- Stub-related warnings (the main issue you were having)
+                  reportMissingTypeStubs = 'none', -- Ignore missing stubs
+                  reportUnknownMemberType = 'none', -- Don't warn about unknown types
+                  reportUnknownArgumentType = 'none', -- Don't warn about untyped args
+                  reportUnknownVariableType = 'none', -- Don't warn about untyped vars
+                  reportMissingParameterType = 'none', -- Don't warn about missing param types
+                  reportUnknownParameterType = 'none', -- Don't warn about unknown param types
+                  reportMissingModuleSource = 'none', -- Don't warn about missing source files
+                  reportImportCycles = 'none', -- Don't warn about import cycles
+
+                  -- Keep important warnings
+                  reportGeneralTypeIssues = 'warning', -- Keep general issues as warnings
+                  reportOptionalMemberAccess = 'information', -- Optional access as info only
+                  reportOptionalSubscript = 'information', -- Optional subscript as info
+                  reportPrivateImportUsage = 'none', -- Allow private imports
+                  reportUntypedFunctionDecorator = 'none', -- Ignore untyped decorators
+                  reportUntypedClassDecorator = 'none', -- Ignore untyped class decorators
+                  reportUntypedBaseClass = 'none', -- Ignore untyped base classes
+                  reportUntypedNamedTuple = 'none', -- Ignore untyped NamedTuples
+                },
+              },
+            },
+          },
+        },
 
         lua_ls = {
           -- cmd = { ... },
@@ -716,6 +821,9 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'ruff', -- Python linter and formatter (standalone tool)
+        -- Note: LSP servers are auto-installed via mason-lspconfig,
+        -- only add non-LSP tools here
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -768,8 +876,8 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
-        -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
+        -- Use Ruff for Python formatting and import sorting
+        python = { 'ruff_format', 'ruff_organize_imports' },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
@@ -855,9 +963,34 @@ require('lazy').setup({
 
       sources = {
         default = { 'lsp', 'path', 'snippets', 'lazydev' },
+        -- Add vim-dadbod completion for SQL files
+        per_filetype = {
+          sql = { 'vim-dadbod-completion', 'lsp', 'snippets' },
+          mysql = { 'vim-dadbod-completion', 'lsp', 'snippets' },
+          plsql = { 'vim-dadbod-completion', 'lsp', 'snippets' },
+        },
         providers = {
           lazydev = { module = 'lazydev.integrations.blink', score_offset = 100 },
+          ['vim-dadbod-completion'] = {
+            name = 'Dadbod',
+            module = 'vim_dadbod_completion.blink',
+            score_offset = 85,
+          },
         },
+      },
+
+      -- Cmdline completion (moved out of sources per new API)
+      cmdline = {
+        sources = function()
+          local type = vim.fn.getcmdtype()
+          if type == '/' or type == '?' then
+            return { 'buffer' }
+          end
+          if type == ':' then
+            return { 'cmdline' }
+          end
+          return {}
+        end,
       },
 
       snippets = { preset = 'luasnip' },
@@ -876,25 +1009,28 @@ require('lazy').setup({
     },
   },
 
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
+  { -- OneDark colorscheme (matching your old config)
+    'navarasu/onedark.nvim',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('tokyonight').setup {
-        styles = {
-          comments = { italic = false }, -- Disable italics in comments
+      require('onedark').setup {
+        -- Main options --
+        style = 'warm', -- dark, darker, cool, deep, warm, warmer, light
+        transparent = false,
+        term_colors = true,
+        ending_tildes = false,
+        cmp_itemkind_reverse = false,
+
+        -- Change code style --
+        code_style = {
+          comments = 'none', -- No italics in comments (like your old setup)
+          keywords = 'none',
+          functions = 'none',
+          strings = 'none',
+          variables = 'none',
         },
       }
-
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      require('onedark').load()
     end,
   },
 
@@ -984,7 +1120,7 @@ require('lazy').setup({
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
@@ -1011,6 +1147,48 @@ require('lazy').setup({
     },
   },
 })
+
+-- Pandoc function for markdown compilation
+vim.api.nvim_create_user_command('Dandoc', function()
+  local current_file = vim.fn.expand '%:p'
+  local output_file = vim.fn.expand '%:p:r' .. '.pdf'
+
+  -- Check if current file is a markdown file
+  if not vim.tbl_contains({ 'markdown', 'md', 'mkd', 'mkdn' }, vim.bo.filetype) then
+    vim.notify('Not a markdown file!', vim.log.levels.ERROR)
+    return
+  end
+
+  -- Build pandoc command
+  local cmd = string.format(
+    'pandoc "%s" -o "%s" --pdf-engine=pdflatex '
+      .. '-V geometry:margin=2.5cm -V geometry:a4paper '
+      .. '-V mainfont="DejaVu Serif" -V monofont="DejaVu Sans Mono"',
+    current_file,
+    output_file
+  )
+
+  vim.notify('Generating PDF...', vim.log.levels.INFO)
+
+  -- Execute pandoc command
+  vim.fn.jobstart(cmd, {
+    on_exit = function(_, exit_code)
+      if exit_code == 0 then
+        vim.notify('PDF generated successfully: ' .. output_file, vim.log.levels.INFO)
+      else
+        vim.notify('Pandoc failed with exit code: ' .. exit_code, vim.log.levels.ERROR)
+      end
+    end,
+    on_stderr = function(_, data)
+      if data and #data > 0 then
+        local msg = table.concat(data, '\n')
+        if msg ~= '' then
+          vim.notify('Pandoc error: ' .. msg, vim.log.levels.ERROR)
+        end
+      end
+    end,
+  })
+end, { desc = 'Compile markdown to PDF with Pandoc' })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
