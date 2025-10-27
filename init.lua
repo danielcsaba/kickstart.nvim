@@ -10,7 +10,7 @@ vim.g.have_nerd_font = true
 -- Add TeX binaries to PATH for pandoc PDF generation
 vim.env.PATH = '/Library/TeX/texbin:' .. vim.env.PATH
 
--- Enable 24-bit true color support (from old config)
+-- Enable 24-bit true color support
 vim.opt.termguicolors = true
 
 -- Fix key handling in tmux and other terminals
@@ -188,7 +188,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
--- File-type specific settings (from old config)
+-- File-type specific settings
 vim.api.nvim_create_autocmd('FileType', {
   pattern = 'sql',
   desc = 'SQL file settings',
@@ -1009,7 +1009,7 @@ require('lazy').setup({
     },
   },
 
-  { -- OneDark colorscheme (matching your old config)
+  { -- OneDark colorscheme
     'navarasu/onedark.nvim',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     config = function()
@@ -1023,7 +1023,7 @@ require('lazy').setup({
 
         -- Change code style --
         code_style = {
-          comments = 'none', -- No italics in comments (like your old setup)
+          comments = 'none', -- No italics in comments
           keywords = 'none',
           functions = 'none',
           strings = 'none',
@@ -1080,11 +1080,12 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'sql' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
         enable = true,
+        disable = { 'sql' },
         -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
         --  If you are experiencing weird indenting issues, add the language to
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
